@@ -82,7 +82,7 @@ public class JwtUtil {
     }
 
     public Long getUserIdFromToken(String token, String userSecret) {
-        return Long.parseLong(parseToken(token, userSecret).getSubject());
+        return parseToken(token, userSecret).get("user_id", Long.class);
     }
 
     public String getJtiFromToken(String token, String userSecret) {
@@ -106,7 +106,7 @@ public class JwtUtil {
     public Long extractUserIdWithoutVerification(String token) {
         try {
             JsonNode node = MAPPER.readTree(decodePayloadRaw(token));
-            return node.get("sub").asLong();
+            return node.get("user_id").asLong();
         } catch (Exception e) {
             throw new IllegalArgumentException("Cannot decode JWT payload", e);
         }

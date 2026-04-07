@@ -9,21 +9,26 @@ USE film_db;
 -- 1. users
 -- ──────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS users (
-    id          BIGINT       NOT NULL AUTO_INCREMENT,
-    username    VARCHAR(100) NOT NULL,
-    email       VARCHAR(150) NOT NULL,
-    password    VARCHAR(255) NOT NULL,
-    full_name   VARCHAR(200) DEFAULT NULL,
-    user_type   VARCHAR(20)  NOT NULL DEFAULT 'USER',
-    last_login  TIMESTAMP    NULL DEFAULT NULL,
-    jwt_secret  VARCHAR(255) NOT NULL,
+    id          BIGINT       NOT NULL AUTO_INCREMENT COMMENT 'Khóa chính',
+    username    VARCHAR(100) NOT NULL COMMENT 'Tài khoản đăng nhập',
+    email       VARCHAR(150) NOT NULL COMMENT 'Địa chỉ Email',
+    password    VARCHAR(255) NOT NULL COMMENT 'Mật khẩu',
+    first_name  VARCHAR(100) DEFAULT NULL COMMENT 'Tên người dùng',
+    last_name   VARCHAR(100) DEFAULT NULL COMMENT 'Họ người dùng',
+    phone_number VARCHAR(20) DEFAULT NULL COMMENT 'Số điện thoại',
+    gender      VARCHAR(20)  DEFAULT NULL COMMENT 'Giới tính (MALE, FEMALE, OTHER)',
+    date_of_birth DATE       DEFAULT NULL COMMENT 'Ngày sinh',
+    company     VARCHAR(200) DEFAULT NULL COMMENT 'Tên công ty (Tùy chọn)',
+    user_type   VARCHAR(20)  NOT NULL DEFAULT 'USER' COMMENT 'Phân quyền Role',
+    last_login  TIMESTAMP    NULL DEFAULT NULL COMMENT 'Lần cuối đăng nhập',
+    jwt_secret  VARCHAR(255) NOT NULL COMMENT 'Mã bí mật chữ ký JWT',
 
     -- BaseEntity fields
-    created_at  TIMESTAMP    NULL DEFAULT NULL,
-    created_by  VARCHAR(255) DEFAULT NULL,
-    updated_at  TIMESTAMP    NULL DEFAULT NULL,
-    updated_by  VARCHAR(255) DEFAULT NULL,
-    is_active   TINYINT(1)   NOT NULL DEFAULT 1,
+    created_at  TIMESTAMP    NULL DEFAULT NULL COMMENT 'Ngày tạo',
+    created_by  VARCHAR(255) DEFAULT NULL COMMENT 'Người tạo',
+    updated_at  TIMESTAMP    NULL DEFAULT NULL COMMENT 'Ngày cập nhật',
+    updated_by  VARCHAR(255) DEFAULT NULL COMMENT 'Người cập nhật',
+    is_active   TINYINT(1)   NOT NULL DEFAULT 1 COMMENT 'Trạng thái hoạt động',
 
     PRIMARY KEY (id),
     UNIQUE KEY idx_users_username (username),
@@ -34,24 +39,24 @@ CREATE TABLE IF NOT EXISTS users (
 -- 2. user_token
 -- ──────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS user_token (
-    id                 BIGINT       NOT NULL AUTO_INCREMENT,
-    user_id            BIGINT       NOT NULL,
-    access_token       TEXT         DEFAULT NULL,
-    refresh_token      TEXT         DEFAULT NULL,
-    device_ip          VARCHAR(50)  DEFAULT NULL,
-    user_agent         VARCHAR(500) DEFAULT NULL,
-    access_expires_at  TIMESTAMP    NULL DEFAULT NULL,
-    refresh_expires_at TIMESTAMP    NULL DEFAULT NULL,
-    is_revoked         TINYINT(1)   NOT NULL DEFAULT 0,
-    revoked_at         TIMESTAMP    NULL DEFAULT NULL,
-    revoke_reason      VARCHAR(50)  DEFAULT NULL,
+    id                 BIGINT       NOT NULL AUTO_INCREMENT COMMENT 'Khóa chính',
+    user_id            BIGINT       NOT NULL COMMENT 'Khóa ngoại trỏ đến người dùng',
+    access_token       TEXT         DEFAULT NULL COMMENT 'Token truy cập',
+    refresh_token      TEXT         DEFAULT NULL COMMENT 'Token làm mới',
+    device_ip          VARCHAR(50)  DEFAULT NULL COMMENT 'IP thiết bị đăng nhập',
+    user_agent         VARCHAR(500) DEFAULT NULL COMMENT 'Trình duyệt/Thiết bị',
+    access_expires_at  TIMESTAMP    NULL DEFAULT NULL COMMENT 'Thời điểm hết hạn Access Token',
+    refresh_expires_at TIMESTAMP    NULL DEFAULT NULL COMMENT 'Thời điểm hết hạn Refresh Token',
+    is_revoked         TINYINT(1)   NOT NULL DEFAULT 0 COMMENT 'Cờ vô hiệu hóa token',
+    revoked_at         TIMESTAMP    NULL DEFAULT NULL COMMENT 'Thời điểm vô hiệu hóa',
+    revoke_reason      VARCHAR(50)  DEFAULT NULL COMMENT 'Lý do bị vô hiệu hóa',
 
     -- BaseEntity fields
-    created_at         TIMESTAMP    NULL DEFAULT NULL,
-    created_by         VARCHAR(255) DEFAULT NULL,
-    updated_at         TIMESTAMP    NULL DEFAULT NULL,
-    updated_by         VARCHAR(255) DEFAULT NULL,
-    is_active          TINYINT(1)   NOT NULL DEFAULT 1,
+    created_at         TIMESTAMP    NULL DEFAULT NULL COMMENT 'Ngày tạo',
+    created_by         VARCHAR(255) DEFAULT NULL COMMENT 'Người tạo',
+    updated_at         TIMESTAMP    NULL DEFAULT NULL COMMENT 'Ngày cập nhật',
+    updated_by         VARCHAR(255) DEFAULT NULL COMMENT 'Người cập nhật',
+    is_active          TINYINT(1)   NOT NULL DEFAULT 1 COMMENT 'Trạng thái hoạt động',
 
     PRIMARY KEY (id),
     INDEX idx_user_token_user_id (user_id),
@@ -63,18 +68,18 @@ CREATE TABLE IF NOT EXISTS user_token (
 -- 3. permission_api
 -- ──────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS permission_api (
-    id          BIGINT       NOT NULL AUTO_INCREMENT,
-    user_type   VARCHAR(20)  NOT NULL,
-    http_method VARCHAR(10)  NOT NULL,
-    uri_pattern VARCHAR(300) NOT NULL,
-    description VARCHAR(500) DEFAULT NULL,
+    id          BIGINT       NOT NULL AUTO_INCREMENT COMMENT 'Khóa chính',
+    user_type   VARCHAR(20)  NOT NULL COMMENT 'Loại người dùng được cấp quyền',
+    http_method VARCHAR(10)  NOT NULL COMMENT 'Phương thức HTTP',
+    uri_pattern VARCHAR(300) NOT NULL COMMENT 'Đường dẫn API (Pattern)',
+    description VARCHAR(500) DEFAULT NULL COMMENT 'Mô tả quyền hạn',
 
     -- BaseEntity fields
-    created_at  TIMESTAMP    NULL DEFAULT NULL,
-    created_by  VARCHAR(255) DEFAULT NULL,
-    updated_at  TIMESTAMP    NULL DEFAULT NULL,
-    updated_by  VARCHAR(255) DEFAULT NULL,
-    is_active   TINYINT(1)   NOT NULL DEFAULT 1,
+    created_at  TIMESTAMP    NULL DEFAULT NULL COMMENT 'Ngày tạo',
+    created_by  VARCHAR(255) DEFAULT NULL COMMENT 'Người tạo',
+    updated_at  TIMESTAMP    NULL DEFAULT NULL COMMENT 'Ngày cập nhật',
+    updated_by  VARCHAR(255) DEFAULT NULL COMMENT 'Người cập nhật',
+    is_active   TINYINT(1)   NOT NULL DEFAULT 1 COMMENT 'Trạng thái hoạt động',
 
     PRIMARY KEY (id),
     INDEX idx_perm_user_type (user_type),
@@ -82,38 +87,41 @@ CREATE TABLE IF NOT EXISTS permission_api (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ──────────────────────────────────────────────────────────────
--- 4. access_log
+-- 4. user_addresses
 -- ──────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS access_log (
-    id           BIGINT       NOT NULL AUTO_INCREMENT,
-    uri          VARCHAR(500) DEFAULT NULL,
-    http_method  VARCHAR(10)  DEFAULT NULL,
-    params       TEXT         DEFAULT NULL,
-    from_ip      VARCHAR(50)  DEFAULT NULL,
-    device_id    VARCHAR(100) DEFAULT NULL,
-    user_id      BIGINT       DEFAULT NULL,
-    user_type    VARCHAR(20)  DEFAULT NULL,
-    request_body TEXT         DEFAULT NULL,
-    http_status  INT          DEFAULT NULL,
-    exception    TEXT         DEFAULT NULL,
-    duration_ms  BIGINT       DEFAULT NULL,
-    request_at   TIMESTAMP    NULL DEFAULT NULL,
+CREATE TABLE IF NOT EXISTS user_addresses (
+    id              BIGINT       NOT NULL AUTO_INCREMENT,
+    user_id         BIGINT       NOT NULL COMMENT 'Khóa ngoại trỏ đến bảng users',
+    is_default      TINYINT(1)   NOT NULL DEFAULT 0 COMMENT 'Cờ hiệu Địa chỉ mặc định hiển thị trên Profile',
+    country         VARCHAR(100) DEFAULT NULL COMMENT 'Quốc gia/Vùng lãnh thổ',
+    address_line    VARCHAR(255) DEFAULT NULL COMMENT 'Địa chỉ nhà/đường',
+    apartment_suite VARCHAR(255) DEFAULT NULL COMMENT 'Căn hộ/Tòa nhà',
+    city            VARCHAR(100) DEFAULT NULL COMMENT 'Thành phố',
+    state           VARCHAR(100) DEFAULT NULL COMMENT 'Bang/Tỉnh',
+    zip_code        VARCHAR(50)  DEFAULT NULL COMMENT 'Mã Bưu điện Zipcode',
+
+    -- BaseEntity fields
+    created_at      TIMESTAMP    NULL DEFAULT NULL COMMENT 'Ngày tạo',
+    created_by      VARCHAR(255) DEFAULT NULL COMMENT 'Người tạo',
+    updated_at      TIMESTAMP    NULL DEFAULT NULL COMMENT 'Ngày cập nhật',
+    updated_by      VARCHAR(255) DEFAULT NULL COMMENT 'Người cập nhật',
+    is_active       TINYINT(1)   NOT NULL DEFAULT 1 COMMENT 'Trạng thái hoạt động',
 
     PRIMARY KEY (id),
-    INDEX idx_access_log_user_id (user_id),
-    INDEX idx_access_log_request_at (request_at)
+    CONSTRAINT fk_user_address_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_addresses_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ──────────────────────────────────────────────────────────────
 -- 5. redis_connection_log
 -- ──────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS redis_connection_log (
-    id            BIGINT       NOT NULL AUTO_INCREMENT,
-    operation     VARCHAR(30)  DEFAULT NULL,
-    redis_key     VARCHAR(300) DEFAULT NULL,
-    status        VARCHAR(20)  DEFAULT NULL,
-    error_message TEXT         DEFAULT NULL,
-    executed_at   TIMESTAMP    NULL DEFAULT NULL,
+    id            BIGINT       NOT NULL AUTO_INCREMENT COMMENT 'Khóa chính',
+    operation     VARCHAR(30)  DEFAULT NULL COMMENT 'Tên thao tác (SET, GET...)',
+    redis_key     VARCHAR(300) DEFAULT NULL COMMENT 'Khóa Redis bị tác động',
+    status        VARCHAR(20)  DEFAULT NULL COMMENT 'Trạng thái lỗi hay thành công',
+    error_message TEXT         DEFAULT NULL COMMENT 'Mô tả lỗi (Nếu có)',
+    executed_at   TIMESTAMP    NULL DEFAULT NULL COMMENT 'Thời gian thực thi',
 
     PRIMARY KEY (id),
     INDEX idx_redis_log_executed_at (executed_at),
@@ -124,15 +132,15 @@ CREATE TABLE IF NOT EXISTS redis_connection_log (
 -- 6. rabbitmq_connection_log
 -- ──────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS rabbitmq_connection_log (
-    id            BIGINT       NOT NULL AUTO_INCREMENT,
-    exchange_name VARCHAR(200) DEFAULT NULL,
-    queue_name    VARCHAR(200) DEFAULT NULL,
-    routing_key   VARCHAR(200) DEFAULT NULL,
-    message_id    VARCHAR(100) DEFAULT NULL,
-    message_body  TEXT         DEFAULT NULL,
-    status        VARCHAR(30)  DEFAULT NULL,
-    error_message TEXT         DEFAULT NULL,
-    executed_at   TIMESTAMP    NULL DEFAULT NULL,
+    id            BIGINT       NOT NULL AUTO_INCREMENT COMMENT 'Khóa chính',
+    exchange_name VARCHAR(200) DEFAULT NULL COMMENT 'Tên Exchange',
+    queue_name    VARCHAR(200) DEFAULT NULL COMMENT 'Tên Hàng đợi Queue',
+    routing_key   VARCHAR(200) DEFAULT NULL COMMENT 'Khóa định tuyến Routing Key',
+    message_id    VARCHAR(100) DEFAULT NULL COMMENT 'ID của thông điệp',
+    message_body  TEXT         DEFAULT NULL COMMENT 'Nội dung thông điệp',
+    status        VARCHAR(30)  DEFAULT NULL COMMENT 'Trạng thái gửi/lắng nghe',
+    error_message TEXT         DEFAULT NULL COMMENT 'Mô tả lỗi',
+    executed_at   TIMESTAMP    NULL DEFAULT NULL COMMENT 'Thời gian thực thi',
 
     PRIMARY KEY (id),
     INDEX idx_rmq_log_executed_at (executed_at),

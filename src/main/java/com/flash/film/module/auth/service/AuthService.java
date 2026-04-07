@@ -123,7 +123,8 @@ public class AuthService {
                 user.setUsername(request.getUsername());
                 user.setEmail(request.getEmail());
                 user.setPassword(passwordEncoder.encode(request.getPassword()));
-                user.setFullName(request.getFullName());
+                user.setFirstName(request.getFirstName());
+                user.setLastName(request.getLastName());
                 user.setUserType(UserType.USER);
                 user.setJwtSecret(UUID.randomUUID().toString());
                 user.setCreatedBy(request.getUsername());

@@ -33,7 +33,7 @@ public abstract class BaseEntity {
     @Column(name = "updated_by")
     private String updatedBy;
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_active", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
     private Boolean isActive = true;
 
 }

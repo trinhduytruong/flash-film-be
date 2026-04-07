@@ -2,6 +2,7 @@ package com.flash.film.module.user.service;
 
 import com.flash.film.common.enums.AppCode;
 import com.flash.film.common.exception.CustomException;
+import com.flash.film.common.config.security.CustomUserDetails;
 import com.flash.film.module.user.entity.User;
 import com.flash.film.module.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -42,14 +43,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     private UserDetails buildUserDetails(User user) {
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getId().toString())
-                .password(user.getPassword())
-                .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + user.getUserType().name())))
-                .accountExpired(false)
-                .accountLocked(false)
-                .credentialsExpired(false)
-                .disabled(!user.getIsActive())
-                .build();
+        return new CustomUserDetails(user);
     }
 }

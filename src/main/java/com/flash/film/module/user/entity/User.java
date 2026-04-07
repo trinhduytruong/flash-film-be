@@ -1,18 +1,19 @@
 package com.flash.film.module.user.entity;
 
 import com.flash.film.common.entity.BaseEntity;
+import com.flash.film.common.enums.Gender;
 import com.flash.film.common.enums.UserType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
 
 /**
  * Bảng users — lưu thông tin người dùng.
- * jwtSecret là secret riêng mỗi user để ký JWT (rotate = invalidate toàn bộ
- * token).
+ * jwtSecret là secret riêng mỗi user để ký JWT (rotate = invalidate toàn bộ token).
  * userType xác định nhóm quyền (ADMIN, MODERATOR, USER).
  */
 @Getter
@@ -33,8 +34,24 @@ public class User extends BaseEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "full_name", length = 200)
-    private String fullName;
+    @Column(name = "first_name", length = 100)
+    private String firstName;
+    
+    @Column(name = "last_name", length = 100)
+    private String lastName;
+
+    @Column(name = "phone_number", length = 20)
+    private String phoneNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender", length = 20)
+    private Gender gender;
+
+    @Column(name = "date_of_birth")
+    private Date dateOfBirth;
+
+    @Column(name = "company", length = 200)
+    private String company;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "user_type", nullable = false, length = 20)
