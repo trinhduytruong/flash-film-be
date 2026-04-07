@@ -157,4 +157,10 @@ VALUES
     ('ADMIN', 'POST',   '/film/**', 'Admin full POST access',   NOW(), 1),
     ('ADMIN', 'PUT',    '/film/**', 'Admin full PUT access',    NOW(), 1),
     ('ADMIN', 'PATCH',  '/film/**', 'Admin full PATCH access',  NOW(), 1),
-    ('ADMIN', 'DELETE', '/film/**', 'Admin full DELETE access',  NOW(), 1);
+    ('ADMIN', 'DELETE', '/film/**', 'Admin full DELETE access',  NOW(), 1),
+
+    -- Default USER permissions (basic access)
+    ('USER', 'GET',    '/film/user/v1/profile', 'User get profile', NOW(), 1),
+    ('USER', 'PUT',    '/film/user/v1/profile', 'User update profile', NOW(), 1),
+    ('USER', 'POST',   '/film/auth/v1/logout', 'User logout', NOW(), 1),
+    ('USER', 'PUT',    '/film/auth/v1/change-password', 'User change password', NOW(), 1);

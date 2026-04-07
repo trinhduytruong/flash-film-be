@@ -3,7 +3,7 @@ package com.flash.film.common.config.security;
 import com.flash.film.common.util.JwtUtil;
 import com.flash.film.module.log.service.AccessLoggerService;
 import com.flash.film.module.permission.service.PermissionService;
-import com.flash.film.module.user.service.UserDetailsServiceImpl;
+import com.flash.film.module.user.service.impl.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

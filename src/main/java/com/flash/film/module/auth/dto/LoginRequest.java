@@ -8,8 +8,9 @@ import lombok.Setter;
 @Setter
 public class LoginRequest {
 
-    @NotBlank(message = "Username is required")
-    private String username;
+    @NotBlank(message = "Email is required")
+    @jakarta.validation.constraints.Email(message = "Email format is invalid")
+    private String email;
 
     @NotBlank(message = "Password is required")
     private String password;

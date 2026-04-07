@@ -1,4 +1,4 @@
-package com.flash.film.module.user.service;
+package com.flash.film.module.user.service.impl;
 
 import com.flash.film.common.dto.ApiResponse;
 import com.flash.film.common.enums.AppCode;
@@ -9,6 +9,7 @@ import com.flash.film.module.user.entity.User;
 import com.flash.film.module.user.entity.UserAddress;
 import com.flash.film.module.user.repository.UserAddressRepository;
 import com.flash.film.module.user.repository.UserRepository;
+import com.flash.film.module.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

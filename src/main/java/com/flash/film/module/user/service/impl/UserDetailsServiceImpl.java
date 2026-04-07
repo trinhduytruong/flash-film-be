@@ -1,4 +1,4 @@
-package com.flash.film.module.user.service;
+package com.flash.film.module.user.service.impl;
 
 import com.flash.film.common.enums.AppCode;
 import com.flash.film.common.exception.CustomException;

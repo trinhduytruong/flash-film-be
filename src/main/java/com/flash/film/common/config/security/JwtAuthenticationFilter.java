@@ -9,7 +9,7 @@ import com.flash.film.common.util.JwtUtil;
 import com.flash.film.module.log.service.AccessLoggerService;
 import com.flash.film.module.permission.service.PermissionService;
 import com.flash.film.module.user.entity.User;
-import com.flash.film.module.user.service.UserDetailsServiceImpl;
+import com.flash.film.module.user.service.impl.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

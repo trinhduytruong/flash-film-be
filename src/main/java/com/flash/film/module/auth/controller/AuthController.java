@@ -11,6 +11,7 @@ import com.flash.film.module.auth.dto.RegisterRequest;
 import com.flash.film.module.auth.dto.ResetPasswordRequest;
 import com.flash.film.module.auth.dto.SendOtpRequest;
 import com.flash.film.module.auth.service.AuthService;
+import com.flash.film.common.config.security.CustomUserDetails;
 import com.flash.film.module.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -102,11 +103,11 @@ public class AuthController {
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Logout — revoke token, clear refresh cookie")
     public ResponseEntity<ApiResponse<Void>> logout(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request,
             HttpServletResponse response) {
 
-        Long userId = Long.parseLong(userDetails.getUsername());
+        Long userId = userDetails.getUserId();
         String bearer = request.getHeader("Authorization");
         if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
             authService.logout(userId, bearer.substring(7));
@@ -120,10 +121,10 @@ public class AuthController {
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Change password — revokes all sessions after success")
     public ResponseEntity<ApiResponse<Void>> changePassword(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid ChangePasswordRequest request) {
 
-        Long userId = Long.parseLong(userDetails.getUsername());
+        Long userId = userDetails.getUserId();
         authService.changePassword(userId, request);
 
         return ResponseEntity.ok(ApiResponse.ok(null, AppCode.CHANGE_PASSWORD_SUCCESS));
