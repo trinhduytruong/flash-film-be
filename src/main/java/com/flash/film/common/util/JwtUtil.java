@@ -35,24 +35,26 @@ public class JwtUtil {
 
     // ── Token generation ────────────────────────────────────────────────────
 
-    public String generateAccessToken(Long userId, String userSecret) {
+    public String generateAccessToken(Long userId, String username, String userSecret) {
         long expMs = appProperties.getJwt().getAccessTokenExpirationMs();
         return Jwts.builder()
                 .id(UUID.randomUUID().toString())
-                .subject(userId.toString())
                 .claim("type", "access")
+                .claim("user_id", userId)
+                .claim("username", username)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expMs))
                 .signWith(buildKey(userSecret))
                 .compact();
     }
 
-    public String generateRefreshToken(Long userId, String userSecret) {
+    public String generateRefreshToken(Long userId, String username, String userSecret) {
         long expMs = appProperties.getJwt().getRefreshTokenExpirationMs();
         return Jwts.builder()
                 .id(UUID.randomUUID().toString())
-                .subject(userId.toString())
                 .claim("type", "refresh")
+                .claim("user_id", userId)
+                .claim("username", username)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expMs))
                 .signWith(buildKey(userSecret))

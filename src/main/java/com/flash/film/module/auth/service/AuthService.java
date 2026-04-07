@@ -148,9 +148,9 @@ public class AuthService {
 
                 boolean refreshEnabled = appProperties.getJwt().isRefreshEnabled();
 
-                String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getJwtSecret());
+                String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getUsername(), user.getJwtSecret());
                 String refreshToken = refreshEnabled
-                                ? jwtUtil.generateRefreshToken(user.getId(), user.getJwtSecret())
+                                ? jwtUtil.generateRefreshToken(user.getId(), user.getUsername(), user.getJwtSecret())
                                 : null;
 
                 userTokenService.saveTokens(user.getId(), accessToken, refreshToken, httpRequest);
@@ -225,7 +225,7 @@ public class AuthService {
                                                 "Refresh token not found"));
 
                 String oldAccessToken = tokenRecord.getAccessToken();
-                String newAccessToken = jwtUtil.generateAccessToken(userId, user.getJwtSecret());
+                String newAccessToken = jwtUtil.generateAccessToken(userId, user.getUsername(), user.getJwtSecret());
 
                 userTokenService.updateAccessToken(tokenRecord, newAccessToken, oldAccessToken);
 
