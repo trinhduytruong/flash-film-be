@@ -25,7 +25,6 @@ public interface UserTokenRepository extends JpaRepository<UserToken, Long> {
     @Query("SELECT t FROM UserToken t WHERE t.userId = :userId ORDER BY t.createdAt DESC")
     List<UserToken> findAllByUserId(@Param("userId") Long userId);
 
-    /** Revoke tất cả token của một user (dùng khi đổi password hoặc admin revoke) */
     @Modifying
     @Transactional
     @Query("UPDATE UserToken t SET t.isRevoked = true, t.revokedAt = :revokedAt, t.revokeReason = :reason " +
@@ -34,7 +33,6 @@ public interface UserTokenRepository extends JpaRepository<UserToken, Long> {
                           @Param("revokedAt") Timestamp revokedAt,
                           @Param("reason") String reason);
 
-    /** Xóa cứng các token mà refresh_token đã hết hạn */
     @Modifying
     @Transactional
     @Query("DELETE FROM UserToken t WHERE t.refreshExpiresAt <= :thresholdDate")

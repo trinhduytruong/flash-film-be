@@ -24,4 +24,8 @@ public class RegisterRequest {
 
     @Size(max = 200, message = "Full name must not exceed 200 characters")
     private String fullName;
+
+    @NotBlank(message = "OTP is required")
+    @Size(min = 6, max = 6, message = "OTP must be exactly 6 digits")
+    private String otpCode;
 }

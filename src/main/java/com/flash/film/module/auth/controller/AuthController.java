@@ -8,6 +8,7 @@ import com.flash.film.module.auth.dto.ChangePasswordRequest;
 import com.flash.film.module.auth.dto.LoginRequest;
 import com.flash.film.module.auth.dto.LoginResponse;
 import com.flash.film.module.auth.dto.RegisterRequest;
+import com.flash.film.module.auth.dto.SendOtpRequest;
 import com.flash.film.module.auth.service.AuthService;
 import com.flash.film.module.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +35,15 @@ public class AuthController {
 
     private final AuthService authService;
     private final CookieUtil cookieUtil;
+
+    @PostMapping("/send-register-otp")
+    @Operation(summary = "Send OTP to email for registration")
+    public ResponseEntity<ApiResponse<Void>> sendRegisterOtp(
+            @RequestBody @Valid SendOtpRequest request) {
+
+        authService.sendRegisterOtp(request);
+        return ResponseEntity.ok(ApiResponse.ok(null, AppCode.SUCCESS, "OTP has been sent to your email"));
+    }
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user account")
