@@ -6,8 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.flash.film.common.enums.AppCode;
 import com.flash.film.common.exception.CustomException;
 import com.flash.film.common.util.JwtUtil;
-import com.flash.film.module.log.entity.AccessLog;
-import com.flash.film.module.log.repository.AccessLogRepository;
+import com.flash.film.module.log.service.AccessLoggerService;
 import com.flash.film.module.permission.service.PermissionService;
 import com.flash.film.module.user.entity.User;
 import com.flash.film.module.user.service.UserDetailsServiceImpl;
@@ -39,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
     private final PermissionService permissionService;
-    private final AccessLogRepository accessLogRepository;
+    private final AccessLoggerService accessLoggerService;
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -58,9 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/actuator/health"
     };
 
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String uri = request.getRequestURI();
+    private boolean isPublicPath(String uri) {
         for (String path : PUBLIC_PATHS) {
             if (uri.equals(path) || uri.startsWith(path + "/")) {
                 return true;
@@ -76,13 +73,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request,
                 request.getContentLength() > 0 ? request.getContentLength() : 1024 * 1024);
-        AccessLog accessLog = buildInitialLog(request);
+        Map<String, Object> accessLog = buildInitialLog(request);
         long startTime = System.currentTimeMillis();
 
         try {
             String jwt = extractJwt(request);
 
-            if (StringUtils.hasText(jwt)) {
+            boolean isPublic = isPublicPath(request.getRequestURI());
+
+            if (!isPublic && StringUtils.hasText(jwt)) {
                 // decode payload to get userId (no verification yet)
                 Long userId = jwtUtil.extractUserIdWithoutVerification(jwt);
 
@@ -102,8 +101,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
-                accessLog.setUserId(userId);
-                accessLog.setUserType(user.getUserType().name());
+                accessLog.put("userId", userId);
+                accessLog.put("userType", user.getUserType().name());
+                accessLog.put("username", user.getUsername());
 
                 // check permission BEFORE processing
                 permissionService.checkAccessApi(user, request.getMethod(), request.getRequestURI());
@@ -113,15 +113,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (CustomException ex) {
             log.warn("CustomException in filter: {}", ex.getMessage());
-            accessLog.setException(ex.getMessage());
+            accessLog.put("exception", ex.getMessage());
             writeJsonError(response, ex.getAppCode(), ex.getMessage(), ex.getHttpStatus().value());
         } catch (Exception ex) {
             log.error("Filter error: {}", ex.getMessage(), ex);
-            accessLog.setException(ex.getMessage());
+            accessLog.put("exception", ex.getMessage());
             sendError(response, accessLog, HttpStatus.UNAUTHORIZED, "Unauthorized");
         } finally {
             appendBodyToLog(wrappedRequest, accessLog);
-            accessLog.setDurationMs(System.currentTimeMillis() - startTime);
+            accessLog.put("durationMs", System.currentTimeMillis() - startTime);
             saveLog(accessLog);
         }
     }
@@ -136,20 +136,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private AccessLog buildInitialLog(HttpServletRequest request) {
-        AccessLog log = new AccessLog();
-        log.setUri(request.getRequestURI());
-        log.setHttpMethod(request.getMethod());
-        log.setFromIp(request.getHeader("X-Forwarded-For") != null
+    private Map<String, Object> buildInitialLog(HttpServletRequest request) {
+        Map<String, Object> log = new HashMap<>();
+        log.put("uri", request.getRequestURI());
+        log.put("httpMethod", request.getMethod());
+        log.put("fromIp", request.getHeader("X-Forwarded-For") != null
                 ? request.getHeader("X-Forwarded-For")
                 : request.getRemoteAddr());
-        log.setDeviceId(request.getHeader("device-id"));
-        log.setParams(request.getParameterMap().toString());
-        log.setRequestAt(new java.sql.Timestamp(System.currentTimeMillis()));
+        log.put("deviceId", request.getHeader("device-id"));
+        log.put("params", request.getParameterMap().toString());
+        log.put("requestAt", new java.util.Date().toString());
         return log;
     }
 
-    private void appendBodyToLog(ContentCachingRequestWrapper request, AccessLog accessLog) {
+    private void appendBodyToLog(ContentCachingRequestWrapper request, Map<String, Object> accessLog) {
         try {
             byte[] bodyBytes = request.getContentAsByteArray();
             if (bodyBytes.length == 0)
@@ -157,21 +157,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String body = new String(bodyBytes, StandardCharsets.UTF_8);
             JsonNode node = MAPPER.readTree(body);
             if (node instanceof ObjectNode obj) {
+                if (obj.has("username") && !accessLog.containsKey("username")) {
+                    accessLog.put("username", obj.get("username").asText());
+                }
                 for (String field : SENSITIVE_FIELDS) {
                     if (obj.has(field))
                         obj.put(field, "***");
                 }
             }
-            accessLog.setRequestBody(MAPPER.writeValueAsString(node));
+            accessLog.put("requestBody", MAPPER.writeValueAsString(node));
         } catch (Exception e) {
             log.debug("Could not parse request body: {}", e.getMessage());
         }
     }
 
-    private void sendError(HttpServletResponse response, AccessLog accessLog,
+    private void sendError(HttpServletResponse response, Map<String, Object> accessLog,
             HttpStatus status, String message) throws IOException {
-        accessLog.setException(message);
-        accessLog.setHttpStatus(status.value());
+        accessLog.put("exception", message);
+        accessLog.put("httpStatus", status.value());
         writeJsonError(response, AppCode.UNAUTHORIZED, message, status.value());
     }
 
@@ -188,9 +191,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.getWriter().write(MAPPER.writeValueAsString(body));
     }
 
-    private void saveLog(AccessLog accessLog) {
+    private void saveLog(Map<String, Object> accessLog) {
         try {
-            accessLogRepository.save(accessLog);
+            accessLoggerService.logAccessAsync(accessLog);
         } catch (Exception e) {
             log.error("Failed to save access log: {}", e.getMessage());
         }

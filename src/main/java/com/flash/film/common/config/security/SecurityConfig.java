@@ -1,7 +1,7 @@
 package com.flash.film.common.config.security;
 
 import com.flash.film.common.util.JwtUtil;
-import com.flash.film.module.log.repository.AccessLogRepository;
+import com.flash.film.module.log.service.AccessLoggerService;
 import com.flash.film.module.permission.service.PermissionService;
 import com.flash.film.module.user.service.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
     private final PermissionService permissionService;
-    private final AccessLogRepository accessLogRepository;
+    private final AccessLoggerService accessLoggerService;
 
     private static final String[] PUBLIC_PATHS = {
             "/film/auth/v1/register",
@@ -47,7 +47,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtUtil, userDetailsService, permissionService, accessLogRepository);
+        return new JwtAuthenticationFilter(jwtUtil, userDetailsService, permissionService, accessLoggerService);
     }
 
     @Bean
