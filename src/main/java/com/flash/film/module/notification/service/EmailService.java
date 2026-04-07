@@ -53,4 +53,17 @@ public class EmailService {
                 context
         );
     }
+
+    public void sendOtpForgotPasswordEmail(String toEmail, String otpCode) {
+        Context context = new Context();
+        context.setVariable("email", toEmail);
+        context.setVariable("otpCode", otpCode);
+
+        sendHtmlEmail(
+                toEmail,
+                "[Flash DTF] Password Reset Verification",
+                "otp-forgot-password",
+                context
+        );
+    }
 }

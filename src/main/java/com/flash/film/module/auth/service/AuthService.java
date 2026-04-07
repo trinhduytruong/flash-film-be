@@ -7,6 +7,7 @@ import com.flash.film.common.util.JwtUtil;
 import com.flash.film.module.auth.dto.LoginRequest;
 import com.flash.film.module.auth.dto.LoginResponse;
 import com.flash.film.module.auth.dto.RegisterRequest;
+import com.flash.film.module.auth.dto.ResetPasswordRequest;
 import com.flash.film.module.auth.dto.SendOtpRequest;
 import com.flash.film.module.auth.dto.ChangePasswordRequest;
 import com.flash.film.common.enums.UserType;
@@ -54,6 +55,48 @@ public class AuthService {
                 emailService.sendOtpRegisterEmail(request.getEmail(), otpCode);
                 
                 log.info("SEND_REGISTER_OTP — email={}", request.getEmail());
+        }
+
+        public void sendForgotPasswordOtp(SendOtpRequest request) {
+                if (!userRepository.existsByEmail(request.getEmail())) {
+                        throw new CustomException(AppCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND,
+                                        "No account found with this email");
+                }
+
+                String otpCode = String.format("%06d", new Random().nextInt(1000000));
+                String redisKey = "OTP:FORGOT_PASSWORD:" + request.getEmail();
+                
+                redisService.set(redisKey, otpCode, 300); // 5 minutes TTL
+                emailService.sendOtpForgotPasswordEmail(request.getEmail(), otpCode);
+                
+                log.info("SEND_FORGOT_PASSWORD_OTP — email={}", request.getEmail());
+        }
+
+        public void resetPassword(ResetPasswordRequest request) {
+                String redisKey = "OTP:FORGOT_PASSWORD:" + request.getEmail();
+                Object cachedOtp = redisService.get(redisKey);
+                
+                if (cachedOtp == null) {
+                        throw new CustomException(AppCode.VALIDATION_ERROR, HttpStatus.BAD_REQUEST, "OTP is expired or missing");
+                }
+                if (!cachedOtp.toString().equals(request.getOtpCode())) {
+                        throw new CustomException(AppCode.VALIDATION_ERROR, HttpStatus.BAD_REQUEST, "Invalid OTP code");
+                }
+
+                User user = userRepository.findByEmail(request.getEmail())
+                        .orElseThrow(() -> new CustomException(AppCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND, "User not found"));
+                
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                user.setJwtSecret(UUID.randomUUID().toString()); // Rotate JWT secret to invalidate old tokens immediately
+                user.setUpdatedBy("SYSTEM_RESET");
+                userRepository.save(user);
+
+                // Revoke all existing sessions tokens so whoever is using the old password gets kicked out
+                userTokenRepository.revokeAllByUserId(user.getId(),
+                                new java.sql.Timestamp(System.currentTimeMillis()), "FORGOT_PASSWORD");
+
+                redisService.delete(redisKey);
+                log.info("RESET_PASSWORD — userId={} email={}", user.getId(), user.getEmail());
         }
 
         public User register(RegisterRequest request) {

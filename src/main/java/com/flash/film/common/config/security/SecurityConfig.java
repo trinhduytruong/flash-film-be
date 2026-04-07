@@ -36,6 +36,8 @@ public class SecurityConfig {
             "/film/auth/v1/login",
             "/film/auth/v1/refresh",
             "/film/auth/v1/send-register-otp",
+            "/film/auth/v1/send-forgot-password-otp",
+            "/film/auth/v1/reset-password",
             "/api-docs/**",
             "/redoc/**",
             "/redoc",

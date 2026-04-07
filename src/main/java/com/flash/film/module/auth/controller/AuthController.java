@@ -8,6 +8,7 @@ import com.flash.film.module.auth.dto.ChangePasswordRequest;
 import com.flash.film.module.auth.dto.LoginRequest;
 import com.flash.film.module.auth.dto.LoginResponse;
 import com.flash.film.module.auth.dto.RegisterRequest;
+import com.flash.film.module.auth.dto.ResetPasswordRequest;
 import com.flash.film.module.auth.dto.SendOtpRequest;
 import com.flash.film.module.auth.service.AuthService;
 import com.flash.film.module.user.entity.User;
@@ -43,6 +44,24 @@ public class AuthController {
 
         authService.sendRegisterOtp(request);
         return ResponseEntity.ok(ApiResponse.ok(null, AppCode.SUCCESS, "OTP has been sent to your email"));
+    }
+
+    @PostMapping("/send-forgot-password-otp")
+    @Operation(summary = "Send OTP to email for forgot password")
+    public ResponseEntity<ApiResponse<Void>> sendForgotPasswordOtp(
+            @RequestBody @Valid SendOtpRequest request) {
+
+        authService.sendForgotPasswordOtp(request);
+        return ResponseEntity.ok(ApiResponse.ok(null, AppCode.SUCCESS, "OTP for password reset has been sent to your email"));
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Reset password using OTP")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @RequestBody @Valid ResetPasswordRequest request) {
+
+        authService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.ok(null, AppCode.SUCCESS, "Password has been successfully reset"));
     }
 
     @PostMapping("/register")
