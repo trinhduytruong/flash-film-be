@@ -153,14 +153,25 @@ CREATE TABLE IF NOT EXISTS rabbitmq_connection_log (
 -- ──────────────────────────────────────────────────────────────
 INSERT INTO permission_api (user_type, http_method, uri_pattern, description, created_at, is_active)
 VALUES
+    -- =================== QUYỀN CỦA ADMIN (Tuyệt đối) ===================
     ('ADMIN', 'GET',    '/film/**', 'Admin full GET access',    NOW(), 1),
     ('ADMIN', 'POST',   '/film/**', 'Admin full POST access',   NOW(), 1),
     ('ADMIN', 'PUT',    '/film/**', 'Admin full PUT access',    NOW(), 1),
     ('ADMIN', 'PATCH',  '/film/**', 'Admin full PATCH access',  NOW(), 1),
-    ('ADMIN', 'DELETE', '/film/**', 'Admin full DELETE access',  NOW(), 1),
+    ('ADMIN', 'DELETE', '/film/**', 'Admin full DELETE access', NOW(), 1),
 
-    -- Default USER permissions (basic access)
-    ('USER', 'GET',    '/film/user/v1/profile', 'User get profile', NOW(), 1),
-    ('USER', 'PUT',    '/film/user/v1/profile', 'User update profile', NOW(), 1),
-    ('USER', 'POST',   '/film/auth/v1/logout', 'User logout', NOW(), 1),
-    ('USER', 'PUT',    '/film/auth/v1/change-password', 'User change password', NOW(), 1);
+    -- =================== QUYỀN CỦA MODERATOR (Quản trị nội dung) ========
+    ('MODERATOR', 'GET',    '/film/**', 'Moderator full GET access',   NOW(), 1),
+    ('MODERATOR', 'POST',   '/film/**', 'Moderator full POST access',  NOW(), 1),
+    ('MODERATOR', 'PUT',    '/film/**', 'Moderator full PUT access',   NOW(), 1),
+    ('MODERATOR', 'PATCH',  '/film/**', 'Moderator full PATCH access', NOW(), 1),
+    ('MODERATOR', 'POST',   '/film/auth/v1/logout', 'Moderator logout', NOW(), 1),
+    ('MODERATOR', 'PUT',    '/film/auth/v1/change-password', 'Moderator change password', NOW(), 1),
+
+    -- =================== QUYỀN CỦA USER (Chỉ API cá nhân) ================
+    ('USER', 'GET',    '/film/user/v1/**', 'Xem thông tin Profile cá nhân', NOW(), 1),
+    ('USER', 'PUT',    '/film/user/v1/**', 'Cập nhật Profile cá nhân', NOW(), 1),
+    ('USER', 'POST',   '/film/auth/v1/logout', 'Đăng xuất', NOW(), 1),
+    ('USER', 'PUT',    '/film/auth/v1/change-password', 'Đổi mật khẩu', NOW(), 1),
+    ('USER', 'GET',    '/film/token/v1/**', 'Xem danh sách thiết bị/token', NOW(), 1),
+    ('USER', 'DELETE', '/film/token/v1/**', 'Xóa quyền/thu hồi thiết bị', NOW(), 1);
