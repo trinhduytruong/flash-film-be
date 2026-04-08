@@ -1,26 +1,24 @@
 package com.flash.film.module.redis.service.impl;
 
+import com.flash.film.module.log.service.RedisLoggerService;
 import com.flash.film.module.redis.service.RedisService;
 
-import com.flash.film.module.redis.entity.RedisConnectionLog;
-import com.flash.film.module.redis.repository.RedisConnectionLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Redis service — wrap RedisTemplate với error logging vào DB.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class RedisServiceImpl implements RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final RedisConnectionLogRepository logRepository;
+    private final RedisLoggerService redisLoggerService;
 
     public void set(String key, Object value, long ttlSeconds) {
         try {
@@ -75,15 +73,16 @@ public class RedisServiceImpl implements RedisService {
 
     private void saveLog(String operation, String key, String status, String errorMessage) {
         try {
-            RedisConnectionLog log = new RedisConnectionLog();
-            log.setOperation(operation);
-            log.setRedisKey(key);
-            log.setStatus(status);
-            log.setErrorMessage(errorMessage);
-            log.setExecutedAt(new java.sql.Timestamp(System.currentTimeMillis()));
-            logRepository.save(log);
+            Map<String, Object> logData = new HashMap<>();
+            logData.put("operation", operation);
+            logData.put("redisKey", key);
+            logData.put("status", status);
+            logData.put("errorMessage", errorMessage);
+            logData.put("executedAt", new java.util.Date().toString());
+            
+            redisLoggerService.logRedisAsync(logData);
         } catch (Exception e) {
-            // Không để log lỗi làm crash app
+            log.error("Failed to write async redis log: {}", e.getMessage());
         }
     }
 }

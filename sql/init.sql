@@ -112,41 +112,7 @@ CREATE TABLE IF NOT EXISTS user_addresses (
     INDEX idx_user_addresses_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ──────────────────────────────────────────────────────────────
--- 5. redis_connection_log
--- ──────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS redis_connection_log (
-    id            BIGINT       NOT NULL AUTO_INCREMENT COMMENT 'Khóa chính',
-    operation     VARCHAR(30)  DEFAULT NULL COMMENT 'Tên thao tác (SET, GET...)',
-    redis_key     VARCHAR(300) DEFAULT NULL COMMENT 'Khóa Redis bị tác động',
-    status        VARCHAR(20)  DEFAULT NULL COMMENT 'Trạng thái lỗi hay thành công',
-    error_message TEXT         DEFAULT NULL COMMENT 'Mô tả lỗi (Nếu có)',
-    executed_at   TIMESTAMP    NULL DEFAULT NULL COMMENT 'Thời gian thực thi',
 
-    PRIMARY KEY (id),
-    INDEX idx_redis_log_executed_at (executed_at),
-    INDEX idx_redis_log_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ──────────────────────────────────────────────────────────────
--- 6. rabbitmq_connection_log
--- ──────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS rabbitmq_connection_log (
-    id            BIGINT       NOT NULL AUTO_INCREMENT COMMENT 'Khóa chính',
-    exchange_name VARCHAR(200) DEFAULT NULL COMMENT 'Tên Exchange',
-    queue_name    VARCHAR(200) DEFAULT NULL COMMENT 'Tên Hàng đợi Queue',
-    routing_key   VARCHAR(200) DEFAULT NULL COMMENT 'Khóa định tuyến Routing Key',
-    message_id    VARCHAR(100) DEFAULT NULL COMMENT 'ID của thông điệp',
-    message_body  TEXT         DEFAULT NULL COMMENT 'Nội dung thông điệp',
-    status        VARCHAR(30)  DEFAULT NULL COMMENT 'Trạng thái gửi/lắng nghe',
-    error_message TEXT         DEFAULT NULL COMMENT 'Mô tả lỗi',
-    executed_at   TIMESTAMP    NULL DEFAULT NULL COMMENT 'Thời gian thực thi',
-
-    PRIMARY KEY (id),
-    INDEX idx_rmq_log_executed_at (executed_at),
-    INDEX idx_rmq_log_status (status),
-    INDEX idx_rmq_log_queue (queue_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ──────────────────────────────────────────────────────────────
 -- Seed: Default ADMIN permissions (full access)
