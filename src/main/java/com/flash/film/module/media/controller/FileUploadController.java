@@ -5,11 +5,12 @@ import com.flash.film.common.config.security.CustomUserDetails;
 import com.flash.film.module.media.dto.MediaFileResponse;
 import com.flash.film.module.media.service.MediaFileService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.flash.film.common.enums.MediaType;
 
 @RestController
 @RequestMapping("/film/user/v1/files")
@@ -18,12 +19,12 @@ public class FileUploadController {
 
     private final MediaFileService mediaFileService;
 
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<MediaFileResponse>> uploadArtwork(
-            @RequestParam("file") MultipartFile file) {
-        
+    @PostMapping(value = "/upload", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<MediaFileResponse>> uploadFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("type") MediaType fileType) {
         Long userId = getCurrentUserId();
-        return ResponseEntity.ok(mediaFileService.uploadArtwork(file, userId));
+        return ResponseEntity.ok(mediaFileService.uploadFile(file, fileType, userId));
     }
 
     private Long getCurrentUserId() {

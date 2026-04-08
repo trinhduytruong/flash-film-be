@@ -31,20 +31,21 @@ public class MediaFileServiceImpl implements MediaFileService {
     @Value("${app.storage.allowed-mime-types}")
     private List<String> allowedMimeTypes;
 
-    private static final long MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+    @Value("${app.storage.max-file-size}")
+    private long maxFileSize;
 
     @Override
     @Transactional
-    public ApiResponse<MediaFileResponse> uploadArtwork(MultipartFile file, Long userId) {
+    public ApiResponse<MediaFileResponse> uploadFile(MultipartFile file, MediaType fileType, Long userId) {
         validateFile(file);
 
         try {
-            // Upload file to the active storage provider
-            String storagePath = storageService.uploadFile(file, "artworks");
+            String folderName = fileType.name().toLowerCase() + "s";
+            String storagePath = storageService.uploadFile(file, folderName);
 
             MediaFile mediaFile = new MediaFile();
             mediaFile.setUserId(userId);
-            mediaFile.setFileType(MediaType.ARTWORK);
+            mediaFile.setFileType(fileType);
             mediaFile.setStorageDisk(storageService.getStorageDisk());
             mediaFile.setStoragePath(storagePath);
             mediaFile.setOriginalName(file.getOriginalFilename());
@@ -79,8 +80,9 @@ public class MediaFileServiceImpl implements MediaFileService {
             throw new CustomException(AppCode.VALIDATION_ERROR, HttpStatus.BAD_REQUEST, "File is empty");
         }
         
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new CustomException(AppCode.VALIDATION_ERROR, HttpStatus.BAD_REQUEST, "File is too large. Max 100MB allowed");
+        if (file.getSize() > maxFileSize) {
+            long maxMb = maxFileSize / (1024 * 1024);
+            throw new CustomException(AppCode.VALIDATION_ERROR, HttpStatus.BAD_REQUEST, "File is too large. Max " + maxMb + "MB allowed");
         }
 
         String mimeType = file.getContentType();
