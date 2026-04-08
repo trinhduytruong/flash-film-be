@@ -171,6 +171,9 @@ VALUES
     -- =================== QUYỀN CỦA USER (Chỉ API cá nhân) ================
     ('USER', 'GET',    '/film/user/v1/**', 'Xem thông tin Profile cá nhân', NOW(), 1),
     ('USER', 'PUT',    '/film/user/v1/**', 'Cập nhật Profile cá nhân', NOW(), 1),
+    ('USER', 'POST',   '/film/user/v1/**', 'Thêm mới', NOW(), 1),
+    ('USER', 'DELETE', '/film/user/v1/**', 'Xóa', NOW(), 1),
+    ('USER', 'PATCH',  '/film/user/v1/**', 'Cập nhật một phần', NOW(), 1),
     ('USER', 'POST',   '/film/auth/v1/logout', 'Đăng xuất', NOW(), 1),
     ('USER', 'PUT',    '/film/auth/v1/change-password', 'Đổi mật khẩu', NOW(), 1),
     ('USER', 'GET',    '/film/token/v1/**', 'Xem danh sách thiết bị/token', NOW(), 1),

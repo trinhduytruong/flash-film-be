@@ -6,12 +6,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Date;
+import java.util.List;
 
 @Getter
 @Setter
 @Builder
 public class UserProfileResponse {
-    
     private String username;
     private String email;
     private String firstName;
@@ -20,6 +20,5 @@ public class UserProfileResponse {
     private Gender gender;
     private Date dateOfBirth;
     private String company;
-    
-    private AddressDto address;
+    private List<AddressResponse> addresses;
 }
