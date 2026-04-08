@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Arrays;
 
 @Slf4j
 @Service
@@ -36,8 +37,19 @@ public class MediaFileServiceImpl implements MediaFileService {
 
     @Override
     @Transactional
-    public ApiResponse<MediaFileResponse> uploadFile(MultipartFile file, MediaType fileType, Long userId) {
+    public ApiResponse<MediaFileResponse> uploadFile(MultipartFile file, String type, Long userId) {
         validateFile(file);
+
+        MediaType fileType;
+        try {
+            fileType = MediaType.valueOf(type.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new CustomException(
+                    AppCode.VALIDATION_ERROR,
+                    HttpStatus.BAD_REQUEST,
+                    "The value " + type + " is invalid. Please pass one of the following values: " +
+                    Arrays.toString(MediaType.values()));
+        }
 
         try {
             String folderName = fileType.name().toLowerCase() + "s";

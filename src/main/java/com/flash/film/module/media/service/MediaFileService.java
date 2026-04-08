@@ -7,5 +7,5 @@ import org.springframework.web.multipart.MultipartFile;
 import com.flash.film.common.enums.MediaType;
 
 public interface MediaFileService {
-    ApiResponse<MediaFileResponse> uploadFile(MultipartFile file, MediaType type, Long userId);
+    ApiResponse<MediaFileResponse> uploadFile(MultipartFile file, String type, Long userId);
 }

@@ -10,8 +10,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.flash.film.common.enums.MediaType;
-
 @RestController
 @RequestMapping("/film/user/v1/files")
 @RequiredArgsConstructor
@@ -22,9 +20,9 @@ public class FileUploadController {
     @PostMapping(value = "/upload", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<MediaFileResponse>> uploadFile(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("type") MediaType fileType) {
+            @RequestParam("type") String type) {
         Long userId = getCurrentUserId();
-        return ResponseEntity.ok(mediaFileService.uploadFile(file, fileType, userId));
+        return ResponseEntity.ok(mediaFileService.uploadFile(file, type, userId));
     }
 
     private Long getCurrentUserId() {
