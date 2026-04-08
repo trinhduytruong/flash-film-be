@@ -51,6 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/film/auth/v1/register",
             "/film/auth/v1/login",
             "/film/auth/v1/refresh",
+            "/film/public",
             "/api-docs",
             "/redoc",
             "/v3/api-docs",
