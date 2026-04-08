@@ -19,6 +19,10 @@ import lombok.Setter;
 })
 public class PermissionApi extends BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "user_type", nullable = false, length = 20)
     private UserType userType;

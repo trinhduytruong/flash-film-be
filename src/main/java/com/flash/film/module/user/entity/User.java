@@ -25,6 +25,10 @@ import java.sql.Timestamp;
 })
 public class User extends BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(name = "username", nullable = false, unique = true, length = 100)
     private String username;
 

@@ -112,6 +112,34 @@ CREATE TABLE IF NOT EXISTS user_addresses (
     INDEX idx_user_addresses_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ──────────────────────────────────────────────────────────────
+-- 5. media_files
+-- ──────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS media_files (
+    id              BIGINT       NOT NULL AUTO_INCREMENT COMMENT 'Khóa chính',
+    user_id         BIGINT       NULL COMMENT 'Tài khoản sở hữu file',
+    file_type       VARCHAR(30)  NOT NULL COMMENT 'IMAGE / PDF / MOCKUP / ARTWORK',
+    storage_disk    VARCHAR(30)  NOT NULL COMMENT 'LOCAL / S3 / MINIO',
+    storage_path    VARCHAR(500) NOT NULL UNIQUE COMMENT 'Đường dẫn/Key lưu file',
+    original_name   VARCHAR(255) NOT NULL COMMENT 'Tên gốc',
+    mime_type       VARCHAR(100) NOT NULL COMMENT 'Định dạng file thật',
+    file_size_bytes BIGINT       NOT NULL COMMENT 'Kích thước file',
+    width_px        INT          NULL COMMENT 'Chiều rộng',
+    height_px       INT          NULL COMMENT 'Chiều cao',
+    dpi             INT          NULL COMMENT 'Độ phân giải',
+    checksum_sha256 CHAR(64)     NULL COMMENT 'Chuỗi SHA256 chống trùng',
+    status          VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE' COMMENT 'ACTIVE / DELETED',
+    created_at      TIMESTAMP    NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Ngày tạo',
+    created_by      VARCHAR(50)  NULL COMMENT 'Người tạo',
+    updated_at      TIMESTAMP    NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Ngày cập nhật',
+    updated_by      VARCHAR(50)  NULL COMMENT 'Người sửa cuối',
+    is_active       TINYINT(1)   NULL DEFAULT 1 COMMENT '0: Xóa mềm, 1: Đang dùng',
+
+    PRIMARY KEY (id),
+    CONSTRAINT fk_media_file_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_media_user (user_id),
+    INDEX idx_media_checksum (checksum_sha256)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 -- ──────────────────────────────────────────────────────────────
