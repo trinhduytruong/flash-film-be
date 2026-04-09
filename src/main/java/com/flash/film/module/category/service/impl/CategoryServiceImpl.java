@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,7 +34,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .collect(Collectors.toMap(Category::getId, this::mapToResponse));
 
         // Build the tree
-        List<CategoryResponse> roots = new java.util.ArrayList<>();
+        List<CategoryResponse> roots = new ArrayList<>();
         for (Category category : allCategories) {
             CategoryResponse response = dtoMap.get(category.getId());
             if (category.getParentId() == null) {
