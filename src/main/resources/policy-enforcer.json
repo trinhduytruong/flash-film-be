@@ -1,0 +1,31 @@
+{
+  "realm": "film-realm",
+  "auth-server-url": "http://localhost:8888/",
+  "resource": "film-backend",
+  "credentials": {
+    "secret": "WmucNDLSYauIn2cgFCOnCF4usb4SFSuJ"
+  },
+  "enforcement-mode": "PERMISSIVE",
+  "paths": [
+    {
+      "path": "/film/public/*",
+      "enforcement-mode": "DISABLED"
+    },
+    {
+      "path": "/api-docs/*",
+      "enforcement-mode": "DISABLED"
+    },
+    {
+      "path": "/redoc/*",
+      "enforcement-mode": "DISABLED"
+    },
+    {
+      "path": "/v3/api-docs/*",
+      "enforcement-mode": "DISABLED"
+    },
+    {
+      "path": "/actuator/health",
+      "enforcement-mode": "DISABLED"
+    }
+  ]
+}

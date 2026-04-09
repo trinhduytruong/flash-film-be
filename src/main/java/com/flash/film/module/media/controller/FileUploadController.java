@@ -1,14 +1,14 @@
 package com.flash.film.module.media.controller;
 
 import com.flash.film.common.dto.ApiResponse;
-import com.flash.film.common.config.security.CustomUserDetails;
 import com.flash.film.module.media.dto.MediaFileResponse;
 import com.flash.film.module.media.service.MediaFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -27,10 +27,7 @@ public class FileUploadController {
     }
 
     private Long getCurrentUserId() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof CustomUserDetails) {
-            return ((CustomUserDetails) principal).getUserId();
-        }
-        return null;
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        return (Long) attr.getRequest().getAttribute("localUserId");
     }
 }

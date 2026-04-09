@@ -5,11 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.flash.film.common.enums.AppCode;
 import com.flash.film.common.exception.CustomException;
-import com.flash.film.common.util.JwtUtil;
 import com.flash.film.module.log.service.AccessLoggerService;
-import com.flash.film.module.permission.service.PermissionService;
-import com.flash.film.module.user.entity.User;
-import com.flash.film.module.user.service.impl.UserDetailsServiceImpl;
+import com.flash.film.common.util.KeycloakUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,13 +15,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.util.StringUtils;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
+
+import com.flash.film.module.user.entity.User;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -33,12 +30,10 @@ import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class KeycloakAuthFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
-    private final UserDetailsServiceImpl userDetailsService;
-    private final PermissionService permissionService;
     private final AccessLoggerService accessLoggerService;
+    private final KeycloakUserSyncService keycloakUserSyncService;
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -48,9 +43,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     };
 
     private static final String[] PUBLIC_PATHS = {
-            "/film/auth/v1/register",
-            "/film/auth/v1/login",
-            "/film/auth/v1/refresh",
             "/film/public",
             "/api-docs",
             "/redoc",
@@ -78,36 +70,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         long startTime = System.currentTimeMillis();
 
         try {
-            String jwt = extractJwt(request);
-
             boolean isPublic = isPublicPath(request.getRequestURI());
 
-            if (!isPublic && StringUtils.hasText(jwt)) {
-                // decode payload to get userId (no verification yet)
-                Long userId = jwtUtil.extractUserIdWithoutVerification(jwt);
+            if (!isPublic) {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+                    // Sync user JIT và lấy local ID
+                    User localUser = keycloakUserSyncService.syncUser(jwt);
+                    
+                    // Lưu localUserId vào request attribute để Controller lấy
+                    request.setAttribute("localUserId", localUser.getId());
 
-                // load user + jwtSecret from DB
-                User user = userDetailsService.loadRawUserById(userId);
-
-                // validate JWT with per-user secret
-                if (!jwtUtil.validateToken(jwt, user.getJwtSecret())) {
-                    sendError(response, accessLog, HttpStatus.UNAUTHORIZED, "Invalid or expired token");
-                    return;
+                    // Cập nhật thông tin log
+                    accessLog.put("keycloakId", KeycloakUtil.getKeycloakId(jwt));
+                    accessLog.put("userId", localUser.getId());
+                    accessLog.put("email", KeycloakUtil.getEmail(jwt));
+                    accessLog.put("username", KeycloakUtil.getUsername(jwt));
                 }
-
-                // set SecurityContext
-                UserDetails userDetails = userDetailsService.loadUserById(userId);
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null,
-                        userDetails.getAuthorities());
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(auth);
-
-                accessLog.put("userId", userId);
-                accessLog.put("userType", user.getUserType().name());
-                accessLog.put("username", user.getUsername());
-
-                // check permission BEFORE processing
-                permissionService.checkAccessApi(user, request.getMethod(), request.getRequestURI());
             }
 
             filterChain.doFilter(wrappedRequest, response);
@@ -125,16 +104,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             accessLog.put("durationMs", System.currentTimeMillis() - startTime);
             saveLog(accessLog);
         }
-    }
-
-    // ── Helpers ──────────────────────────────────────────────────────────────
-
-    private String extractJwt(HttpServletRequest request) {
-        String bearer = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
-            return bearer.substring(7);
-        }
-        return null;
     }
 
     private Map<String, Object> buildInitialLog(HttpServletRequest request) {

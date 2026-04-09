@@ -1,6 +1,5 @@
 package com.flash.film.module.user.controller;
 
-import com.flash.film.common.config.security.CustomUserDetails;
 import com.flash.film.common.dto.ApiResponse;
 import com.flash.film.module.user.dto.AddressDto;
 import com.flash.film.module.user.dto.AddressResponse;
@@ -10,8 +9,9 @@ import com.flash.film.module.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
 
@@ -69,8 +69,7 @@ public class UserController {
     }
 
     private Long getCurrentUserId() {
-        CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder
-                .getContext().getAuthentication().getPrincipal();
-        return principal.getUserId();
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        return (Long) attr.getRequest().getAttribute("localUserId");
     }
 }
